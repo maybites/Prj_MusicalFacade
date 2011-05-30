@@ -20,13 +20,19 @@
  *
  */
 
-package ch.maybites.prj.musicalFacade;
+package ch.maybites.prj.liquidFacade;
 
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
 
+import ch.maybites.prj.liquidFacade.fisica.FPebble;
+import ch.maybites.prj.liquidFacade.gestalt.water.*;
+import ch.maybites.tools.*;
+
+import gestalt.Gestalt;
+import gestalt.p5.*;
 import processing.core.*;
 import controlP5.*;
 import fisica.*;
@@ -36,15 +42,21 @@ public class MusicalFacadeMain extends PApplet {
 
 	private int oscID;
 
-	FWorld mundo;
-	FBox caja;
-
+	FWorld world;
+	FBox ping;
+	FPoly poly;
+	
 	float x, y;
+	GestaltPlugIn gestalt;
 
+	WaterSurface water;
 	float angleX, angleY, transX, transY, transZ;
 
 	public void setup() {
-		size(1280, 1024, OPENGL);
+		size(1280, 800, OPENGL);
+		GlobalPrefs.getInstance().setDataPath(this.dataPath(""));
+		this.frameRate(60f);
+		
 		// frame.setLocation(1440, 0);
 
 		/**
@@ -57,35 +69,54 @@ public class MusicalFacadeMain extends PApplet {
 		 * monitor.width + " " + monitor.height); size(monitor.width,
 		 * monitor.height, OPENGL); //frame.setLocation(monitor.x, monitor.y);
 		 */
+		Canvas.setup(this);
+		gestalt = Canvas.getInstance().getPlugin();
+		gestalt.drawBeforeProcessing(true);
+		//gestalt.camera().setMode(Gestalt.CAMERA_MODE_LOOK_AT);
+		//gestalt.camera().position().set(0f, -50, 913);
+		//gestalt.camera().lookat().set(0f, -41f, 0f);
+		//gestalt.camera().fovy = 118.0f;
+
+		water = new WaterSurface(width, height);
 
 		Fisica.init(this);
 
-		mundo = new FWorld();
-		mundo.setGravity(0, 200);
+		world = new FWorld();
+		world.setGravity(0, 100);
 
-		frameRate(24);
 		background(0);
 
 	}
 
 	public void draw() {
+		/*
 		fill(0, 100);
 		noStroke();
 		rect(0, 0, width, height);
+		*/
+		//background(0);
+		
+		water.waterviewDistance(-108);
+		//println(mouseY - height/2 + " " + mouseX);
+		camera(width/2.0f, height/2.0f, 800, width/2.0f, height/2.0f, 0f, 0f, 1f, 0f);
+		//gestalt.camera().position().z = mouseX - width/2;
+		//gestalt.camera().fovy = mouseX;
 
 		if ((frameCount % 24) == 0) {
-			FCircle bolita = new FCircle(8);
+			FPebble bolita = new FPebble(8, water);
+			bolita.setName("BALL");
 			bolita.setNoStroke();
 			bolita.setFill(255);
 			bolita.setPosition(100, 20);
 			bolita.setVelocity(0, 400);
 			bolita.setRestitution(0.9f);
 			bolita.setDamping(0);
-			mundo.add(bolita);
+			world.add(bolita);
 		}
 
-		mundo.step();
-		mundo.draw(this);
+		world.step(1f / 120f);
+		world.draw(this);
+		water.drawBoxes(0f);
 	}
 
 	public void keyPressed() {
@@ -102,7 +133,35 @@ public class MusicalFacadeMain extends PApplet {
 			break;
 		}
 	}
+	
+	public void mousePressed() {
+		  if (world.getBody(mouseX, mouseY) != null) {
+		    return;
+		  }
 
+		  poly = new FPoly();
+		  poly.setName("BOX");
+		  poly.setStrokeWeight(3);
+		  poly.setFill(120, 30, 90);
+		  poly.setDensity(0);
+		  poly.setRestitution(0.5f);
+		  poly.vertex(mouseX, mouseY);
+		}
+
+	public void mouseDragged() {
+		  if (poly!=null) {
+		    poly.vertex(mouseX, mouseY);
+		  }
+		}
+
+	public void mouseReleased() {
+		  if (poly!=null) {
+		    world.add(poly);
+		    poly = null;
+		  }
+		}
+
+		/**
 	public void mousePressed() {
 		caja = new FBox(4, 4);
 		caja.setStaticBody(true);
@@ -128,10 +187,30 @@ public class MusicalFacadeMain extends PApplet {
 		mundo.add(caja);
 
 	}
+**/
 
 	public void contactStarted(FContact contacto) {
+		FCircle ball;
+		FPoly box;
 		FBody cuerpo1 = contacto.getBody1();
-		cuerpo1.setFill(255, 0, 0);
+		if(cuerpo1.getName().equals("BALL")){
+			ball = (FCircle)cuerpo1;
+			ball.setFill(0, 0, 255);
+		}else if(cuerpo1.getName().equals("BOX")){
+			box = (FPoly)cuerpo1;
+			box.setFill(255, 0, 0);
+		}
+		
+		cuerpo1 = contacto.getBody2();
+		if(cuerpo1.getName().equals("BALL")){
+			ball = (FCircle)cuerpo1;
+			ball.setFill(0, 0, 255);
+		}else if(cuerpo1.getName().equals("BOX")){
+			box = (FPoly)cuerpo1;
+			box.setFill(255, 0, 0);
+		}
+		
+		//cuerpo1.setFill(255, 0, 0);
 
 		noFill();
 		stroke(255);
@@ -167,7 +246,7 @@ public class MusicalFacadeMain extends PApplet {
 	}
 
 	static public void main(String args[]) {
-		PApplet.main(new String[] { "ch.maybites.prj.musicalFacade.MusicalFacadeMain" });
+		PApplet.main(new String[] { "ch.maybites.prj.liquidFacade.MusicalFacadeMain" });
 		// PApplet.main( new String[] { "--present",
 		// "ch.maybites.prj.musicalFacade" } );
 	}
