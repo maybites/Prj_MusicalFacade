@@ -109,5 +109,25 @@ public class WaterSurface {
     	myCanvas.line(xPos + size/2, yPos + size/2, xPos + size/2, yPos - size/2);
     	myCanvas.line(xPos - size/2, yPos + size/2, xPos - size/2, yPos - size/2);
     }
+    
+    public void drawCenterBox(int _xPos, int _yPos, int sizeX, int sizeY){
+      	float xPos = world2WaterX(_xPos);
+    	float yPos = world2WaterY(_yPos);
+     	myCanvas.line(xPos + sizeX/2, yPos + sizeY/2, xPos - sizeX/2, yPos + sizeY/2);
+    	myCanvas.line(xPos + sizeX/2, yPos - sizeY/2, xPos - sizeX/2, yPos - sizeY/2);
+    	myCanvas.line(xPos + sizeX/2, yPos + sizeY/2, xPos + sizeX/2, yPos - sizeY/2);
+    	myCanvas.line(xPos - sizeX/2, yPos + sizeY/2, xPos - sizeX/2, yPos - sizeY/2);
+    }
+    
+    public void drawBox(int _xPos, int _yPos, int sizeX, int sizeY){
+       	float xPos = world2WaterX(_xPos);
+    	float yPos = world2WaterY(_yPos);
+       	//float xPos = _xPos;
+    	//float yPos = _yPos;
+     	myCanvas.line(xPos, yPos, xPos - sizeX, yPos);
+    	myCanvas.line(xPos - sizeX, yPos, xPos - sizeX, yPos - sizeY);
+    	myCanvas.line(xPos - sizeX, yPos - sizeY, xPos, yPos - sizeY);
+    	myCanvas.line(xPos, yPos - sizeY, xPos, yPos);
+    }
 	
 }

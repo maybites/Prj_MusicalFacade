@@ -22,20 +22,23 @@
 
 package ch.maybites.prj.liquidFacade;
 
-import java.awt.GraphicsConfiguration;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
-import java.awt.Rectangle;
+import java.util.ArrayList;
+
+import org.jbox2d.dynamics.Body;
 
 import ch.maybites.prj.liquidFacade.fisica.FPebble;
+import ch.maybites.prj.liquidFacade.fisica.FWindow;
 import ch.maybites.prj.liquidFacade.gestalt.water.*;
 import ch.maybites.tools.*;
 
 import gestalt.Gestalt;
 import gestalt.p5.*;
 import processing.core.*;
-import controlP5.*;
 import fisica.*;
+
+import oscP5.*;
+import netP5.*;
+
 
 public class MusicalFacadeMain extends PApplet {
 	private static final long serialVersionUID = 1L;
@@ -48,57 +51,107 @@ public class MusicalFacadeMain extends PApplet {
 	
 	float x, y;
 	GestaltPlugIn gestalt;
+	private final String WINDOW_BODY_NAME = "window_";
 
 	WaterSurface water;
 	float angleX, angleY, transX, transY, transZ;
-
+	PShape schloss;
+	OscP5Xtended oscP5;
+	
 	public void setup() {
-		size(1280, 800, OPENGL);
+		size(1920, 1080, OPENGL);
+		//size(1440, 810, OPENGL);
+		frame.setLocation(1440, 0);
 		GlobalPrefs.getInstance().setDataPath(this.dataPath(""));
 		this.frameRate(60f);
 		
-		// frame.setLocation(1440, 0);
-
-		/**
-		 * GraphicsEnvironment ge =
-		 * GraphicsEnvironment.getLocalGraphicsEnvironment(); GraphicsDevice[]
-		 * gs = ge.getScreenDevices(); // gs[1] gets the *second* screen. gs[0]
-		 * would get the primary screen GraphicsDevice gd = gs[1];
-		 * GraphicsConfiguration[] gc = gd.getConfigurations(); monitor =
-		 * gc[0].getBounds(); println(monitor.x + " " + monitor.y + " " +
-		 * monitor.width + " " + monitor.height); size(monitor.width,
-		 * monitor.height, OPENGL); //frame.setLocation(monitor.x, monitor.y);
-		 */
 		Canvas.setup(this);
 		gestalt = Canvas.getInstance().getPlugin();
 		gestalt.drawBeforeProcessing(true);
-		//gestalt.camera().setMode(Gestalt.CAMERA_MODE_LOOK_AT);
-		//gestalt.camera().position().set(0f, -50, 913);
-		//gestalt.camera().lookat().set(0f, -41f, 0f);
-		//gestalt.camera().fovy = 118.0f;
+		
+		camera(width/2.0f, height/2.0f, 1060, width/2.0f, height/2.0f, 0f, 0f, 1f, 0f);
 
 		water = new WaterSurface(width, height);
+		water.waterviewDistance(-162);
 
 		Fisica.init(this);
 
 		world = new FWorld();
-		world.setGravity(0, 100);
+		world.setGravity(0, 200);
 
+		oscP5 = new OscP5Xtended(this,12321);
+		oscP5.plug(this,"createFWindow","/fisica/create");
+
+		schloss = loadShape("vector/SchlossFrontEinfach.svg");
 		background(0);
 
 	}
+	
+	public void oscEvent(OscMessage theOscMessage) {
+		  /* with theOscMessage.isPlugged() you check if the osc message has already been
+		   * forwarded to a plugged method. if theOscMessage.isPlugged()==true, it has already 
+		   * been forwared to another method in your sketch. theOscMessage.isPlugged() can 
+		   * be used for double posting but is not required.
+		  */  
+		  if(theOscMessage.isPlugged()==false) {
+		  /* print the address pattern and the typetag of the received OscMessage */
+		  println("### received an osc message.");
+		  println("### addrpattern\t"+theOscMessage.addrPattern());
+		  println("### typetag\t"+theOscMessage.typetag());
+		  }
+	}
+	
+	public void setWindowsPos(String _name, int posX, int posY, int sizeX, int sizeY){
+		FWindow window = (FWindow) world.hasBodyWidthName(_name);
+		if(window != null){
+			world.remove(window);
+			window.setPosition(posX, posY);
+			window.setHeight(sizeY);
+			window.setWidth(sizeY);
+			world.add(window);
+		}
+	}
+		
+	public void createFWindow(String _name, String _type, String _adress, int posX, int posY, int sizeX, int sizeY){
+		  // Must remove from world and read to change the size
+		FBody body = world.hasBodyWidthName(_name);
+		if(body != null){
+			world.remove(body);
+			oscP5.unplug(body);
+		}
+		FWindow window = new FWindow(water);
+		window.setName(_name);
+		window.setAddress(_name, _adress);
+		window.setStaticBody(true);
+		window.setRestitution(0.9f);
+		window.setPosition(posX, posY);
+		window.setWidth(sizeX);
+		window.setHeight(sizeY);
+		oscP5.plug(window,"setPosition","/fisica/setPos");
+		oscP5.plug(window,"setAddress","/fisica/setAddress");
+		oscP5.plug(window,"setCustom","/fisica/setCustom");
+		world.add(window);
+	}
+
+	public void deleteFWindow(String _name){
+		  // Must remove from world and readd to change the size
+		FBody del = world.hasBodyWidthName(_name);
+		if(del != null)
+			world.remove(del);
+	}
 
 	public void draw() {
+		oscP5.releaseMessages();
 		/*
 		fill(0, 100);
 		noStroke();
 		rect(0, 0, width, height);
 		*/
 		//background(0);
+		shape(schloss, 0, 0, 1920, 1080);
 		
-		water.waterviewDistance(-108);
 		//println(mouseY - height/2 + " " + mouseX);
-		camera(width/2.0f, height/2.0f, 800, width/2.0f, height/2.0f, 0f, 0f, 1f, 0f);
+		//water.waterviewDistance(mouseY - height/2);
 		//gestalt.camera().position().z = mouseX - width/2;
 		//gestalt.camera().fovy = mouseX;
 
@@ -107,16 +160,16 @@ public class MusicalFacadeMain extends PApplet {
 			bolita.setName("BALL");
 			bolita.setNoStroke();
 			bolita.setFill(255);
-			bolita.setPosition(100, 20);
-			bolita.setVelocity(0, 400);
+			bolita.setPosition(400, 20);
+			bolita.setVelocity(100, 200);
 			bolita.setRestitution(0.9f);
 			bolita.setDamping(0);
 			world.add(bolita);
 		}
 
-		world.step(1f / 120f);
+		world.step(1f / 240f);
 		world.draw(this);
-		water.drawBoxes(0f);
+		//water.drawBoxes(0f);
 	}
 
 	public void keyPressed() {
@@ -228,27 +281,9 @@ public class MusicalFacadeMain extends PApplet {
 		cuerpo1.setFill(255);
 	}
 
-	public void readArguments() {
-		for (int i = 0; i < super.args.length; i++) {
-			if (super.args[i].equals("-simID")) {
-				oscID = Integer.parseInt(super.args[++i]);
-			}
-			if (super.args[i].equals("-listenerPort")) {
-				oscID = Integer.parseInt(super.args[++i]);
-			}
-			if (super.args[i].equals("-sendPort")) {
-				oscID = Integer.parseInt(super.args[++i]);
-			}
-			if (super.args[i].equals("-sendAddress")) {
-				oscID = Integer.parseInt(super.args[++i]);
-			}
-		}
-	}
-
 	static public void main(String args[]) {
-		PApplet.main(new String[] { "ch.maybites.prj.liquidFacade.MusicalFacadeMain" });
-		// PApplet.main( new String[] { "--present",
-		// "ch.maybites.prj.musicalFacade" } );
+		//PApplet.main(new String[] { "ch.maybites.prj.liquidFacade.MusicalFacadeMain" });
+		PApplet.main( new String[] { "--display=2", "--present", "ch.maybites.prj.liquidFacade.MusicalFacadeMain" } );
 	}
 
 	public void destroy() {
