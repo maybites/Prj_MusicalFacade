@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ 	<project name="Prj_MusicalFacade" default="default" basedir=".">
+		<description>
+ 		======================================================================================
+			Processing.org -> Eclipse Ant Builder for Applets and Applications
+ 		======================================================================================
+ 		</description>
+ 	    <property name="workspace.location" value="/Users/maf/Arbeiten/02_code/eclipse/libraries"/>
+     	<property name="processing.dir" value="/Applications/Processing"/>
+        <property name="project.name" value="Lib_maybitesCore"/>
+ 		<property name="main.class.name" value=""/>
+ 		<property name="jar.name" value="maybitesCore.jar"/>
+ 		<property name="export.dir" value="/Users/maf/Arbeiten/02_code"/>
+ 		
+		<path id="library-classpath">
+			<fileset dir="${libraryClasspath}" >
+				<!-- #### (3) add the jar files that are required for compiling. edit name.
+				 for more include files. duplicate <include name="" /> #### -->
+				<include name="core.jar"/>
+			</fileset>
+		</path>
+		
+
+ 		<!--
+ 		==================================================================
+ 			DO NOT CHANGE BELOW UNLESS YOU KNOW WHAT YOU ARE DOIN
+ 		==================================================================-->		
+
+ 		 		<property name="project.resources.dir" value="resources"/>
+ 		 	   	<property name="project.bin.dir" value="bin"/>
+		 	   	<property name="project.src.dir" value="src"/>
+		 	   	<property name="project.libs.dir" value="libs"/>
+ 		 	   	<property name="project.build.dir" value="build"/>
+ 			   	<property name="project.library.dir" value="build/library"/>
+ 			   	<property name="project.reference.dir" value="build/reference"/>
+
+ 		 		<property file="${project.resources.dir}/building.properties"/>
+ 		     	
+ 				<target name ="default" description="check conditions">
+
+			 		<copy file="${libXfisica}"
+ 			 		    todir="${project.libs.dir}"/>
+			 		<copy file="${libXgestaltP5}"
+ 			 		    todir="${project.libs.dir}"/>
+			 		<copy file="${libXoscP5}"
+ 			 		    todir="${project.libs.dir}"/>
+			 		<copy file="${lib_maybitesCore}"
+ 			 		    todir="${project.libs.dir}"/>
+			 		<copy file="${libXbox2D}"
+ 			 		    todir="${project.libs.dir}"/>
+
+ 		 		</target>
+ 		 		
+ 				
+ 		 		<target name="jar.build">
+ 		 			<jar jarfile="${project.library.dir}/${jar.name}">
+ 				        <fileset dir="${project.bin.dir}">
+ 				        	<include name="**/*.class"/>
+ 				        </fileset>
+ 					    <manifest>
+ 		      				<attribute name="Built-By" value="${user.name}"/>
+ 		      				<attribute name="Main-Class" value="${main.class.name}"/>
+ 		    			</manifest>
+ 					</jar>	
+ 		  		</target>
+
+ 		 		<target name="doc.build">
+ 		 	    <!-- create the java reference of the library -->
+ 			 	    <javadoc bottom="processing library ${libraryName} by ${author}. ${copyright}"
+ 			 	 	     destdir="${project.reference.dir}"
+ 			 	 	     verbose="false"
+ 			 	 	     stylesheetfile="${project.resources.dir}/stylesheet.css"
+ 			 	 	     doctitle="Javadocs: ${libraryName}"
+ 			 	 	     public="true" version="false"
+ 			 	 	     windowtitle="Javadocs: ${libraryName}">
+ 			 	      <classpath>
+ 			 			<path refid="library-classpath"/>
+ 			 	      </classpath>
+ 			
+ 			 	      <tag name="invisible" scope="all" enabled="false"/>
+ 			 	      <tag name="related" scope="all" enabled="false"/>
+ 			 	      <tag name="extended" scope="all" enabled="false"/>
+ 			 	      <tag name="usage" scope="all" enabled="false"/>
+ 			
+ 			 	      <taglet name="ExampleTaglet" path="${project.resources.dir}/code" />
+ 			 	      <fileset dir="${project.src.dir}" defaultexcludes="yes">
+ 			 	 	<!-- #### (9) add packages to be added to reference. #### -->
+ 			 		<include name="**/*"/>
+ 			 	      </fileset>
+ 			 	    </javadoc>
+ 		 	  	</target>
+
+ 		 	</project>
+ 
