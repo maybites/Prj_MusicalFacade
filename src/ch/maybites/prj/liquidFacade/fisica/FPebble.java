@@ -13,6 +13,10 @@ public class FPebble extends FCircle {
 		water = _water;
 	}
 
+	public void hit(){
+		water.drawPebble(getX(), getY());
+	}
+
 	public void draw(PGraphics applet) {
 		preDraw(applet);
 
@@ -23,8 +27,6 @@ public class FPebble extends FCircle {
 			applet.line(0, 0, getSize() / 2, 0);
 		}
 		
-		water.drawPebble(getX(), getY());
-
 		postDraw(applet);
 	}
 

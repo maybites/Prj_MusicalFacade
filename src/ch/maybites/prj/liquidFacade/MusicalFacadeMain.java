@@ -30,6 +30,7 @@ import ch.maybites.prj.liquidFacade.fisica.FPebble;
 import ch.maybites.prj.liquidFacade.fisica.FWindow;
 import ch.maybites.prj.liquidFacade.gestalt.water.*;
 import ch.maybites.tools.*;
+import ch.maybites.tools.mathematik.Vector2i;
 
 import gestalt.Gestalt;
 import gestalt.p5.*;
@@ -42,26 +43,29 @@ import netP5.*;
 
 public class MusicalFacadeMain extends PApplet {
 	private static final long serialVersionUID = 1L;
-
-	private int oscID;
+	public final static String WINDOW_BODY_NAME = "window_";
+	public final static String STAR_BODY_NAME = "star_";
+	private final int BALL_HORIZONT = 250;
 
 	FWorld world;
-	FBox ping;
-	FPoly poly;
-	
-	float x, y;
 	GestaltPlugIn gestalt;
-	private final String WINDOW_BODY_NAME = "window_";
-
 	WaterSurface water;
-	float angleX, angleY, transX, transY, transZ;
 	PShape schloss;
 	OscP5Xtended oscP5;
+	StarManager starManager;
 	
+	Vector2i startSel, endSel;
+	PFont systemfont;
+	
+	float angleX, angleY, transX, transY, transZ;
+
 	public void setup() {
 		size(1920, 1080, OPENGL);
 		//size(1440, 810, OPENGL);
 		frame.setLocation(1440, 0);
+		systemfont = loadFont("font/SystemFont.vlw");
+		textFont(systemfont, 18); 
+
 		GlobalPrefs.getInstance().setDataPath(this.dataPath(""));
 		this.frameRate(60f);
 		
@@ -79,10 +83,15 @@ public class MusicalFacadeMain extends PApplet {
 		world = new FWorld();
 		world.setGravity(0, 200);
 
+		starManager = new StarManager(water, systemfont);
+
 		oscP5 = new OscP5Xtended(this,12321);
 		oscP5.plug(this,"createFWindow","/fisica/create");
 
+
 		schloss = loadShape("vector/SchlossFrontEinfach.svg");
+		
+	
 		background(0);
 
 	}
@@ -142,34 +151,21 @@ public class MusicalFacadeMain extends PApplet {
 
 	public void draw() {
 		oscP5.releaseMessages();
-		/*
-		fill(0, 100);
-		noStroke();
-		rect(0, 0, width, height);
-		*/
-		//background(0);
-		shape(schloss, 0, 0, 1920, 1080);
-		
-		//println(mouseY - height/2 + " " + mouseX);
-		//water.waterviewDistance(mouseY - height/2);
-		//gestalt.camera().position().z = mouseX - width/2;
-		//gestalt.camera().fovy = mouseX;
+		stroke(255, 0, 0);
+		line(0, BALL_HORIZONT, 1920, BALL_HORIZONT);
 
-		if ((frameCount % 24) == 0) {
-			FPebble bolita = new FPebble(8, water);
-			bolita.setName("BALL");
-			bolita.setNoStroke();
-			bolita.setFill(255);
-			bolita.setPosition(400, 20);
-			bolita.setVelocity(100, 200);
-			bolita.setRestitution(0.9f);
-			bolita.setDamping(0);
-			world.add(bolita);
+		if(startSel != null){
+			noFill();
+			this.rect(startSel.x, startSel.y, endSel.x - startSel.x, endSel.y - startSel.y);
 		}
+		
+		shape(schloss, 0, 0, 1920, 1080);
+				
+		starManager.step(world);
+		starManager.draw(this);
 
 		world.step(1f / 240f);
 		world.draw(this);
-		//water.drawBoxes(0f);
 	}
 
 	public void keyPressed() {
@@ -180,94 +176,67 @@ public class MusicalFacadeMain extends PApplet {
 			break;
 		}
 		switch (key) {
-		case 's':
+		case 'D':
+			starManager.delAll();
 			break;
-		case 'a':
+		case 'r':
+			createRandomStarGenerators(5);
 			break;
 		}
 	}
 	
-	public void mousePressed() {
-		  if (world.getBody(mouseX, mouseY) != null) {
-		    return;
-		  }
-
-		  poly = new FPoly();
-		  poly.setName("BOX");
-		  poly.setStrokeWeight(3);
-		  poly.setFill(120, 30, 90);
-		  poly.setDensity(0);
-		  poly.setRestitution(0.5f);
-		  poly.vertex(mouseX, mouseY);
+	private void createRandomStarGenerators(int _number){
+		for(int i = 0; i < _number; i++){
+			starManager.addStarCreator((int)random(0, 1920), (int)random(0, BALL_HORIZONT), (int)random(0, 10), (int)random(1000, 5000));
 		}
+	}
+	
+	public void mousePressed() {
+		if(this.keyPressed){
+			int pressedKey = (int) key - 48;
+			if(pressedKey >= 0 && pressedKey < 10){
+				starManager.addStarCreator(mouseX, mouseY, pressedKey, abs(BALL_HORIZONT- mouseY) + 20 * 100);
+			}else{
+				switch (key) {
+				case 'd':
+					startSel = new Vector2i(mouseX, mouseY);
+					endSel = new Vector2i(mouseX, mouseY);
+					break;
+				}
+			}
+		}
+	}
 
 	public void mouseDragged() {
-		  if (poly!=null) {
-		    poly.vertex(mouseX, mouseY);
-		  }
+		if(startSel != null){
+			endSel = new Vector2i(mouseX, mouseY);
 		}
+	}
 
 	public void mouseReleased() {
-		  if (poly!=null) {
-		    world.add(poly);
-		    poly = null;
-		  }
+		if(startSel != null){
+			starManager.delStar(min(startSel.x, endSel.x), min(startSel.y, endSel.y), max(startSel.x, endSel.x), max(startSel.y, endSel.y));
+			startSel = null;
+			endSel = null;
 		}
-
-		/**
-	public void mousePressed() {
-		caja = new FBox(4, 4);
-		caja.setStaticBody(true);
-		caja.setRestitution(0.9f);
-		mundo.add(caja);
-		
-
-		x = mouseX;
-		y = mouseY;
 	}
-
-	public void mouseDragged() {
-		if (caja == null) {
-			return;
-		}
-
-		// Must remove from world and readd to change the size
-		mundo.remove(caja);
-		float ang = atan2(y - mouseY, x - mouseX);
-		caja.setRotation(ang);
-		caja.setPosition(x + (mouseX - x) / 2.0f, y + (mouseY - y) / 2.0f);
-		caja.setWidth(dist(mouseX, mouseY, x, y));
-		mundo.add(caja);
-
-	}
-**/
 
 	public void contactStarted(FContact contacto) {
-		FCircle ball;
-		FPoly box;
-		FBody cuerpo1 = contacto.getBody1();
-		if(cuerpo1.getName().equals("BALL")){
-			ball = (FCircle)cuerpo1;
-			ball.setFill(0, 0, 255);
-		}else if(cuerpo1.getName().equals("BOX")){
-			box = (FPoly)cuerpo1;
-			box.setFill(255, 0, 0);
+		FBody body1 = contacto.getBody1();
+		FBody body2 = contacto.getBody2();
+		if(body1.getName() != null && body2.getName() != null){
+			if(body1.getName().startsWith(WINDOW_BODY_NAME))
+				print("body1 is window - ");
+			if(body1.getName().startsWith(STAR_BODY_NAME))
+				((FPebble)body1).hit();
+			if(body2.getName().startsWith(WINDOW_BODY_NAME))
+				println("body2 is window");
+			if(body2.getName().startsWith(STAR_BODY_NAME))
+				((FPebble)body2).hit();
+		} else {
+			println("body without name!!?");
 		}
 		
-		cuerpo1 = contacto.getBody2();
-		if(cuerpo1.getName().equals("BALL")){
-			ball = (FCircle)cuerpo1;
-			ball.setFill(0, 0, 255);
-		}else if(cuerpo1.getName().equals("BOX")){
-			box = (FPoly)cuerpo1;
-			box.setFill(255, 0, 0);
-		}
-		
-		//cuerpo1.setFill(255, 0, 0);
-
-		noFill();
-		stroke(255);
-		ellipse(contacto.getX(), contacto.getY(), 30, 30);
 	}
 
 	void contactPersisted(FContact contact) {
