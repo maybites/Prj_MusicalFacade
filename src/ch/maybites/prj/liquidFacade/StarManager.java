@@ -2,8 +2,9 @@ package ch.maybites.prj.liquidFacade;
 
 import java.util.ArrayList;
 
-import ch.maybites.prj.liquidFacade.fisica.FPebble;
+import ch.maybites.prj.liquidFacade.fisica.FStar;
 import ch.maybites.prj.liquidFacade.gestalt.water.WaterSurface;
+import ch.maybites.tools.Debugger;
 
 import fisica.FBody;
 import fisica.FWorld;
@@ -18,12 +19,42 @@ public class StarManager {
 	private ArrayList<FBody> starQueue;
 	WaterSurface water;
 	PFont font;
-
+	Float[] restitution;
+	Float[] damping;
+	Float[] density;
+	
+	int maxStarTypes = 10;
+	
 	public StarManager(WaterSurface _water, PFont _font){
 		autoStars = new ArrayList<StarCreator>();
 		starQueue = new ArrayList<FBody>();
 		water = _water;
 		font = _font;
+		
+		restitution = new Float[maxStarTypes];
+		damping = new Float[maxStarTypes];
+		density = new Float[maxStarTypes];
+		for(int i = 0; i < maxStarTypes; i++){
+			restitution[i] = 0.9f;
+			damping[i] = 0f;
+			density[i] = 0f;
+		}
+	}
+	
+	public void setStarProperty(int _type, float _rest, float _damp, float _dens){
+		if(_type >= 0 && _type < maxStarTypes){
+			restitution[_type] = _rest;
+			damping[_type] = _damp;
+			density[_type] = _dens;
+		}
+	}
+	
+	public void setStarProperties(float _rest, float _damp, float _dens){
+		for(int i = 0; i < maxStarTypes; i++){
+			restitution[i] = _rest;
+			damping[i] = _damp;
+			density[i] = _dens;
+		}
 	}
 	
 	public void addStarCreator(int _posX, int _posY, int _star, int _freq){
@@ -79,22 +110,20 @@ public class StarManager {
 		}		
 	}
 	
-	private synchronized FBody createStar(int _type, int _posX, int _posY){
-		FPebble star = new FPebble(8, water);
-		switch(_type){
-		case 1:
-			break;
-		default:
-			star = new FPebble(8, water);
+	public synchronized FBody createStar(String _address, int _type, int _posX, int _posY){
+		if(_type >= 0 && _type < maxStarTypes){
+			FStar star = new FStar(_address, 8, _type, water);
 			star.setName(MusicalFacadeMain.STAR_BODY_NAME + _type);
 			star.setNoStroke();
 			star.setFill(255);
 			star.setPosition(_posX, _posY);
 			star.setVelocity((910 - _posX) / 50, 200);
-			star.setRestitution(0.9f);
-			star.setDamping(0);
+			star.setRestitution(restitution[_type]);
+			star.setDensity(density[_type]);
+			star.setDamping(damping[_type]);
+			return star;
 		}
-		return star;
+		return new FStar(_address, 8, 1, water);
 	}
 	
 	private class StarCreator extends Thread implements Runnable {
@@ -117,7 +146,7 @@ public class StarManager {
 		public void run(){
 
 			while(alive){
-				addStar2Queue(createStar(type, posX, posY));
+				addStar2Queue(createStar("127.0.0.1", type, posX, posY));
 				
 				if(waitTime > 0){
 					try {

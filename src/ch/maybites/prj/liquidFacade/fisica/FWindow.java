@@ -113,7 +113,17 @@ public class FWindow extends FBody {
 		  m_adress = _adress;
 	  }
   }
-  
+
+  /**
+   * Gets the soundadress of the window.  
+   *
+   * @usage Bodies
+   * @return nothing
+   */
+  public String getAddress(){
+	  return m_adress;
+  }
+
   /**
    * Sets the position of the window.  
    *

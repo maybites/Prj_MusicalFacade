@@ -1,0 +1,10 @@
+soundport=12321
+soundaddress=127.0.0.1
+iphoneport=12321
+listenport=12321
+simulationspeed=240
+simulationgravity=200
+windowrestitution=0.9
+stardamping=0
+stardensity=1.0
+starrestitution=0.9
