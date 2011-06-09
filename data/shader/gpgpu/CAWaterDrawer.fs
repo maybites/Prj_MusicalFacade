@@ -4,7 +4,7 @@ uniform sampler2DRect heightfield;
 
 void main( void ) {
     // black on white
-    const float contrast = 1.0;
+    const float contrast = 2.0;
     vec2 myCoord = vec2(gl_TexCoord[0].s, gl_TexCoord[0].t);
 
     	// take absolut value of current height and scale it a bit

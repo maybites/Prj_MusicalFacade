@@ -1,5 +1,6 @@
 package ch.maybites.prj.liquidFacade.gestalt.water;
 
+import mathematik.Vector3f;
 import ch.maybites.prj.liquidFacade.Canvas;
 import ch.maybites.prj.liquidFacade.gestalt.water.*;
 import gestalt.Gestalt;
@@ -65,6 +66,7 @@ public class WaterSurface {
         Canvas.getInstance().getPlugin().bin(Gestalt.BIN_3D).add(_myWaterView);
       // _myWaterView.rotation(.5f, 0f, 0f);
 
+        _mySimulation.damping = 0.985f;
 	}
 	
 	public void waterviewDistance(int z){
@@ -89,7 +91,7 @@ public class WaterSurface {
     }
 
     public void drawBoxes(float theDeltaTime) {
-        _mySimulation.damping = 0.99f;
+        _mySimulation.damping = 0.3f;
         
         drawBox(200, 200, 30);
         drawBox(200, -200, 60);
@@ -113,10 +115,19 @@ public class WaterSurface {
     public void drawCenterBox(int _xPos, int _yPos, int sizeX, int sizeY){
       	float xPos = world2WaterX(_xPos);
     	float yPos = world2WaterY(_yPos);
-     	myCanvas.line(xPos + sizeX/2, yPos + sizeY/2, xPos - sizeX/2, yPos + sizeY/2);
+    	myCanvas.color(1, 0, 0, 1);
+    	myCanvas.line(xPos + sizeX/2, yPos + sizeY/2, xPos - sizeX/2, yPos + sizeY/2);
     	myCanvas.line(xPos + sizeX/2, yPos - sizeY/2, xPos - sizeX/2, yPos - sizeY/2);
     	myCanvas.line(xPos + sizeX/2, yPos + sizeY/2, xPos + sizeX/2, yPos - sizeY/2);
     	myCanvas.line(xPos - sizeX/2, yPos + sizeY/2, xPos - sizeX/2, yPos - sizeY/2);
+    }
+    
+    public void drawCenterClearBox(int _xPos, int _yPos, int sizeX, int sizeY){
+      	float xPos = world2WaterX(_xPos);
+    	float yPos = world2WaterY(_yPos);
+    	myCanvas.color(0, 1, 0, 1);
+    	myCanvas.fill = true;
+    	myCanvas.box(new Vector3f(xPos, yPos, 0f), new Vector3f(sizeX, sizeY, 0f));
     }
     
     public void drawBox(int _xPos, int _yPos, int sizeX, int sizeY){

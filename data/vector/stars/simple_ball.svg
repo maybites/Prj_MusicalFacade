@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 13.0.2, SVG Export Plug-In . SVG Version: 6.00 Build 14948)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+<svg version="1.0"
+	 id="svg5769" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" sodipodi:version="0.32" xmlns:dc="http://purl.org/dc/elements/1.1/" sodipodi:docname="winged_star.svg" xmlns:cc="http://creativecommons.org/ns#" inkscape:version="0.47 r22583" inkscape:export-ydpi="90" inkscape:export-xdpi="90" xmlns:svg="http://www.w3.org/2000/svg" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" inkscape:export-filename="C:\Mario\Strella\estrella_1.gif"
+	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="93.259px"
+	 height="93.258px" viewBox="-0.533 0.566 93.259 93.258" enable-background="new -0.533 0.566 93.259 93.258" xml:space="preserve"
+	>
+<sodipodi:namedview  height="650px" width="650px" showgrid="false" inkscape:current-layer="svg5769" inkscape:window-y="0" inkscape:window-x="0" inkscape:cy="19.741912" inkscape:cx="26.253968" inkscape:zoom="4" pagecolor="#ffffff" bordercolor="#666666" borderopacity="1.0" objecttolerance="10.0" gridtolerance="10.0" guidetolerance="10.0" inkscape:pageopacity="0.0" inkscape:pageshadow="2" inkscape:window-height="740" inkscape:window-width="1272" id="base" inkscape:window-maximized="0">
+	</sodipodi:namedview>
+<g id="object" transform="matrix(0.15340302,0,0,0.15340302,-4.8324063,-0.53756731)">
+	<radialGradient id="SVGID_1_" cx="294.4695" cy="254.0778" r="52.2441" gradientUnits="userSpaceOnUse">
+		<stop  offset="0" style="stop-color:#FFFFFF"/>
+		<stop  offset="1" style="stop-color:#000000"/>
+	</radialGradient>
+	<circle fill="url(#SVGID_1_)" stroke="#000000" cx="331.989" cy="311.158" r="46.129"/>
+</g>
+<g id="outline_1_" transform="matrix(0.15340302,0,0,0.15340302,-4.8342063,-0.53653731)">
+	<circle fill="none" stroke="#000000" cx="332.004" cy="311.152" r="46.13"/>
+</g>
+</svg>

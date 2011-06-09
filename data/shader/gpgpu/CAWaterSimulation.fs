@@ -30,8 +30,10 @@ void main( void ) {
 	new_height *= damping;
 
 	// external energy
-    	float external_energy = texture2DRect( energy_map, vec2( s, t ) ).r;
+    float external_energy = texture2DRect( energy_map, vec2( s, t ) ).r;
+    //float zero_energy = texture2DRect( energy_map, vec2( s, t ) ).g;
 	new_height += external_energy;
+	
 	
 	// clamp
 	new_height = max (new_height, -1.0);

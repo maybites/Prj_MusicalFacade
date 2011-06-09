@@ -166,13 +166,19 @@ public class FWindow extends FBody {
     this.recreateInWorld();
   }
   
+	public void hit() {
+    	m_water.drawCenterBox((int)getX(), (int)getY(), (int)getWidth(), (int)getHeight());
+	}
+
   public void draw(PGraphics applet) {
+	  
     preDraw(applet);
 
     if (m_image != null ) {
       drawImage(applet);
     } else {
-    	m_water.drawCenterBox((int)getX(), (int)getY(), (int)getWidth(), (int)getHeight());
+    	//m_water.drawCenterClearBox(0,(int)getX(), (int)getY(), (int)getWidth() - 2, (int)getHeight() - 2);
+    	//m_water.drawCenterBox((int)getX(), (int)getY(), (int)getWidth()-2, (int)getHeight()-2);
     	//applet.rect(0, 0, getWidth(), getHeight());
     }
 

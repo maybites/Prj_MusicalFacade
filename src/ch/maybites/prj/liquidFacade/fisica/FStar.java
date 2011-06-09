@@ -4,6 +4,8 @@ import org.jbox2d.collision.shapes.CircleDef;
 import org.jbox2d.collision.shapes.ShapeDef;
 
 import processing.core.PGraphics;
+import ch.maybites.prj.liquidFacade.animation.Animator;
+import ch.maybites.prj.liquidFacade.animation.StarAnimator;
 import ch.maybites.prj.liquidFacade.gestalt.water.WaterSurface;
 import fisica.FBlob;
 import fisica.FBody;
@@ -32,7 +34,7 @@ import fisica.Fisica;
 public class FStar extends FBody {
 	protected float m_size;
 	protected int m_type;
-
+	StarAnimator m_animator;
 	WaterSurface m_water;
 	
 	protected String m_address;
@@ -59,6 +61,11 @@ public class FStar extends FBody {
 		pd.restitution = m_restitution;
 		pd.isSensor = m_sensor;
 		return pd;
+	}
+	
+	public void registerAniator(StarAnimator _animator){
+		m_animator = _animator;
+		m_animator.register(this);
 	}
 
 	/**
@@ -129,7 +136,7 @@ public class FStar extends FBody {
 			drawImage(applet);
 		} else {
 			applet.ellipse(0, 0, getSize(), getSize());
-			applet.line(0, 0, getSize() / 2, 0);
+			applet.line(-getSize(), 0, getSize(), 0);
 		}
 
 		postDraw(applet);

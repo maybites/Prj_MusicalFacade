@@ -2,9 +2,11 @@ package ch.maybites.prj.liquidFacade;
 
 import java.util.ArrayList;
 
+import ch.maybites.prj.liquidFacade.fisica.FImageStar;
 import ch.maybites.prj.liquidFacade.fisica.FStar;
 import ch.maybites.prj.liquidFacade.gestalt.water.WaterSurface;
 import ch.maybites.tools.Debugger;
+import ch.maybites.tools.GlobalPrefs;
 
 import fisica.FBody;
 import fisica.FWorld;
@@ -112,7 +114,12 @@ public class StarManager {
 	
 	public synchronized FBody createStar(String _address, int _type, int _posX, int _posY){
 		if(_type >= 0 && _type < maxStarTypes){
-			FStar star = new FStar(_address, 8, _type, water);
+			FStar star;
+			if(_type == 0){
+				star = new FImageStar(_address, 20, _type, water, GlobalPrefs.getInstance().getAbsDataPath("vector/stars/mlove.svg"));
+			}else{
+				star = new FStar(_address, 8, _type, water);
+			}
 			star.setName(MusicalFacadeMain.STAR_BODY_NAME + _type);
 			star.setNoStroke();
 			star.setFill(255);

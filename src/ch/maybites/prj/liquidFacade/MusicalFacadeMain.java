@@ -36,7 +36,7 @@ import gestalt.Gestalt;
 import gestalt.p5.*;
 import processing.core.*;
 import fisica.*;
-
+import geomerative.*;
 import oscP5.*;
 import netP5.*;
 
@@ -121,6 +121,9 @@ public class MusicalFacadeMain extends PApplet {
 		frame.setLocation(winPosX, winPosY);
 		systemfont = loadFont("font/SystemFont.vlw");
 		textFont(systemfont, 18);
+
+		RG.init(this);
+		RG.setPolygonizer(RG.ADAPTATIVE);
 
 		Canvas.setup(this);
 		gestalt = Canvas.getInstance().getPlugin();
@@ -384,6 +387,7 @@ public class MusicalFacadeMain extends PApplet {
 
 	private void star2windowContact(FStar _star, FWindow _window) {
 		_star.hit();
+		_window.hit();
 		OscMessage soundwindow = new OscMessage(OSC_SOUND_WINDOW);
 		soundwindow.add(_window.getAddress()); // sound address
 		soundwindow.add(_star.getType()); // star type

@@ -1,4 +1,4 @@
-windowsposx=0
+windowsposx=1440
 windowsposy=0
 soundport=12321
 soundaddress=127.0.0.1
