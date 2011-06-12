@@ -15,7 +15,7 @@
   
   You should have received a copy of the GNU Lesser General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 package ch.maybites.prj.liquidFacade.fisica;
 
@@ -28,19 +28,21 @@ import ch.maybites.prj.liquidFacade.gestalt.water.WaterSurface;
 
 import fisica.FBody;
 import fisica.Fisica;
+import gestalt.shape.Color;
 
 import processing.core.*;
 
 /**
  * Represents a rectangular body that can be added to a world.
- *
+ * 
  * <pre>
- * {@code
- * FBox myBox = new FBox(40, 20);
- * world.add(myBox);
+ * {
+ * 	&#064;code
+ * 	FBox myBox = new FBox(40, 20);
+ * 	world.add(myBox);
  * }
  * </pre>
- *
+ * 
  * @usage Bodies
  * @see FCircle
  * @see FBlob
@@ -48,141 +50,154 @@ import processing.core.*;
  * @see FLine
  */
 public class FWindow extends FBody {
-  protected float m_height = 20f;
-  protected float m_width = 20f;
-  
-  protected WaterSurface m_water;
-  
-  protected String m_adress;
+	protected float m_height = 20f;
+	protected float m_width = 20f;
+	int m_id;
+	
+	protected String m_adress;
+	WaterSurface m_water;
 
-  protected ShapeDef getShapeDef() {
-    PolygonDef pd = new PolygonDef();
-    pd.setAsBox(m_width/2.0f, m_height/2.0f);
-    pd.density = m_density;
-    pd.friction = m_friction;
-    pd.restitution = m_restitution;
-    pd.isSensor = m_sensor;
-    return pd;
-  }
+	protected ShapeDef getShapeDef() {
+		PolygonDef pd = new PolygonDef();
+		pd.setAsBox(m_width / 2.0f, m_height / 2.0f);
+		pd.density = m_density;
+		pd.friction = m_friction;
+		pd.restitution = m_restitution;
+		pd.isSensor = m_sensor;
+		return pd;
+	}
 
-  /**
-   * Constructs a rectangular body that can be added to a world.
-   *
-   * @param width  the width of the rectangle
-   * @param height  the height of the rectangle
-   */
-  public FWindow(WaterSurface _water){
-    super();
+	/**
+	 * Constructs a rectangular body that can be added to a world.
+	 * 
+	 * @param width
+	 *            the width of the rectangle
+	 * @param height
+	 *            the height of the rectangle
+	 */
+	public FWindow(WaterSurface _water) {
+		super();
+		m_water = _water;
+	}
 
-    m_water = _water;
-    
-  }
+	/**
+	 * Returns the height of the rectangle.
+	 * 
+	 * @usage Bodies
+	 * @see #getWidth()
+	 * @return the height of the rectangle
+	 */
+	public float getHeight() {
+		// only for FBox
+		return Fisica.worldToScreen(m_height);
+	}
 
-  /**
-   * Returns the height of the rectangle.
-   *
-   * @usage Bodies
-   * @see #getWidth()
-   * @return the height of the rectangle
-   */
-  public float getHeight(){
-    // only for FBox
-    return Fisica.worldToScreen(m_height);
-  }
+	/**
+	 * Returns the width of the rectangle.
+	 * 
+	 * @usage Bodies
+	 * @see #getHeight()
+	 * @return the width of the rectangle
+	 */
+	public float getWidth() {
+		// only for FBox
+		return Fisica.worldToScreen(m_width);
+	}
 
-  /**
-   * Returns the width of the rectangle.
-   *
-   * @usage Bodies
-   * @see #getHeight()
-   * @return the width of the rectangle
-   */
-  public float getWidth(){
-    // only for FBox
-    return Fisica.worldToScreen(m_width);
-  }
+	/**
+	 * Sets the soundadress of the window.
+	 * 
+	 * @usage Bodies
+	 * @return nothing
+	 */
+	public void setAddress(String _name, String _adress) {
+		if (m_name.equals(_name)) {
+			m_adress = _adress;
+		}
+	}
 
-  /**
-   * Sets the soundadress of the window.  
-   *
-   * @usage Bodies
-   * @return nothing
-   */
-  public void setAddress(String _name, String _adress){
-	  if(m_name.equals(_name)){
-		  m_adress = _adress;
-	  }
-  }
+	/**
+	 * Gets the soundadress of the window.
+	 * 
+	 * @usage Bodies
+	 * @return nothing
+	 */
+	public String getAddress() {
+		return m_adress;
+	}
 
-  /**
-   * Gets the soundadress of the window.  
-   *
-   * @usage Bodies
-   * @return nothing
-   */
-  public String getAddress(){
-	  return m_adress;
-  }
-
-  /**
-   * Sets the position of the window.  
-   *
-   * @usage Bodies
-   * @return nothing
-   */
-  public void setPosition(String _name, int posX, int posY, int sizeX, int sizeY){
-	  if(m_name.equals(_name)){
+	/**
+	 * Sets the position of the window.
+	 * 
+	 * @usage Bodies
+	 * @return nothing
+	 */
+	public void setPosition(String _name, int posX, int posY, int sizeX,
+			int sizeY) {
+		if (m_name.equals(_name)) {
 			setPosition(posX, posY);
 			setHeight(sizeY);
 			setWidth(sizeX);
-	  }
-  }
-
-  /**
-   * Sets the height of the rectangle.  
-   * Under the hood the body is removed and readded to the world.
-   *
-   * @usage Bodies
-   * @see #getWidth()
-   * @return the height of the rectangle
-   */
-  public void setHeight(float height){
-    m_height = Fisica.screenToWorld(height);
-    
-    this.recreateInWorld();
-  }
-  
-  /**
-   * Sets the width of the rectangle.  
-   * Under the hood the body is removed and readded to the world.
-   *
-   * @usage Bodies
-   * @see #getWidth()
-   * @return the width of the rectangle
-   */
-  public void setWidth(float width){
-    m_width = Fisica.screenToWorld(width);
-
-    this.recreateInWorld();
-  }
-  
-	public void hit() {
-    	m_water.drawCenterBox((int)getX(), (int)getY(), (int)getWidth(), (int)getHeight());
+		}
 	}
 
-  public void draw(PGraphics applet) {
-	  
-    preDraw(applet);
+	/**
+	 * Sets the height of the rectangle. Under the hood the body is removed and
+	 * readded to the world.
+	 * 
+	 * @usage Bodies
+	 * @see #getWidth()
+	 * @return the height of the rectangle
+	 */
+	public void setHeight(float height) {
+		m_height = Fisica.screenToWorld(height);
 
-    if (m_image != null ) {
-      drawImage(applet);
-    } else {
-    	//m_water.drawCenterClearBox(0,(int)getX(), (int)getY(), (int)getWidth() - 2, (int)getHeight() - 2);
-    	//m_water.drawCenterBox((int)getX(), (int)getY(), (int)getWidth()-2, (int)getHeight()-2);
-    	//applet.rect(0, 0, getWidth(), getHeight());
-    }
+		this.recreateInWorld();
+	}
 
-    postDraw(applet);
-  }
+	/**
+	 * Sets the width of the rectangle. Under the hood the body is removed and
+	 * readded to the world.
+	 * 
+	 * @usage Bodies
+	 * @see #getWidth()
+	 * @return the width of the rectangle
+	 */
+	public void setWidth(float width) {
+		m_width = Fisica.screenToWorld(width);
+
+		this.recreateInWorld();
+	}
+
+	public void hit() {
+		Color col = new Color(getX() / 1920, getY() / 1080, 0.5f, 1);
+		m_water.drawCenterBox(col, (int) getX(), (int) getY(),
+				(int) getWidth(), (int) getHeight());
+	}
+	
+	public void setID(int _id) {
+		m_id = _id;
+	}
+	
+	public int getID() {
+		return m_id;
+	}
+
+	public void draw(PGraphics applet) {
+
+		preDraw(applet);
+
+		if (m_image != null) {
+			drawImage(applet);
+		} else {
+			m_water.drawCenterClearBox((int) getX(), (int) getY(),
+					(int) getWidth() - 3, (int) getHeight() - 3);
+			// m_water.drawCenterBox((int)getX(), (int)getY(),
+			// (int)getWidth()-2, (int)getHeight()-2);
+			// applet.rect(0, 0, getWidth(), getHeight());
+		}
+
+		postDraw(applet);
+	}
 
 }

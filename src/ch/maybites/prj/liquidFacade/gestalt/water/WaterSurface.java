@@ -7,6 +7,7 @@ import gestalt.Gestalt;
 import gestalt.candidates.JoglDisposableBin;
 import gestalt.candidates.glsl.ShaderManager;
 import gestalt.candidates.rendertotexture.JoglFrameBufferObject;
+import gestalt.shape.Color;
 import gestalt.shape.Plane;
 
 public class WaterSurface {
@@ -52,8 +53,10 @@ public class WaterSurface {
         /* simulation */
         _mySimulation = new GPGPUCAWater(myShaderManager,
                                          _myInputEnergyMap,
-                                         "shader/gpgpu/CAWaterSimulation.fs",
-                                         "shader/gpgpu/CAWaterDrawer.fs");
+                                         "shader/gpgpu/CAWaterSimulationColor.fs",
+        								"shader/gpgpu/CAWaterDrawerColor.fs");
+        //"shader/gpgpu/CAWaterSimulation.fs",
+        //"shader/gpgpu/CAWaterDrawer.fs");
         Canvas.getInstance().getPlugin().bin(Gestalt.BIN_FRAME_SETUP).add(_mySimulation);
 
         /* simulation view */
@@ -112,10 +115,10 @@ public class WaterSurface {
     	myCanvas.line(xPos - size/2, yPos + size/2, xPos - size/2, yPos - size/2);
     }
     
-    public void drawCenterBox(int _xPos, int _yPos, int sizeX, int sizeY){
+    public void drawCenterBox(Color c, int _xPos, int _yPos, int sizeX, int sizeY){
       	float xPos = world2WaterX(_xPos);
     	float yPos = world2WaterY(_yPos);
-    	myCanvas.color(1, 0, 0, 1);
+    	myCanvas.color(c);
     	myCanvas.line(xPos + sizeX/2, yPos + sizeY/2, xPos - sizeX/2, yPos + sizeY/2);
     	myCanvas.line(xPos + sizeX/2, yPos - sizeY/2, xPos - sizeX/2, yPos - sizeY/2);
     	myCanvas.line(xPos + sizeX/2, yPos + sizeY/2, xPos + sizeX/2, yPos - sizeY/2);
@@ -125,9 +128,9 @@ public class WaterSurface {
     public void drawCenterClearBox(int _xPos, int _yPos, int sizeX, int sizeY){
       	float xPos = world2WaterX(_xPos);
     	float yPos = world2WaterY(_yPos);
-    	myCanvas.color(0, 1, 0, 1);
+    	myCanvas.color(1, 1, 1, 1);
     	myCanvas.fill = true;
-    	myCanvas.box(new Vector3f(xPos, yPos, 0f), new Vector3f(sizeX, sizeY, 0f));
+    	myCanvas.box(new Vector3f(xPos - sizeX/2, yPos-sizeY/2, 0f), new Vector3f(sizeX, sizeY, 0f));
     }
     
     public void drawBox(int _xPos, int _yPos, int sizeX, int sizeY){

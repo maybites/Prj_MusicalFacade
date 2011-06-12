@@ -62,6 +62,7 @@ public class StarManager {
 	public void addStarCreator(int _posX, int _posY, int _star, int _freq){
 		StarCreator thread = new StarCreator(_posX, _posY, _star, _freq);
 		thread.start();
+		thread.createNextStar();
 		autoStars.add(thread);
 	}
 	
@@ -116,7 +117,7 @@ public class StarManager {
 		if(_type >= 0 && _type < maxStarTypes){
 			FStar star;
 			if(_type == 0){
-				star = new FImageStar(_address, 20, _type, water, GlobalPrefs.getInstance().getAbsDataPath("vector/stars/mlove.svg"));
+				star = new FImageStar(_address, 20, _type, GlobalPrefs.getInstance().getAbsDataPath("vector/stars/mlove.svg"), water);
 			}else{
 				star = new FStar(_address, 8, _type, water);
 			}
@@ -124,7 +125,10 @@ public class StarManager {
 			star.setNoStroke();
 			star.setFill(255);
 			star.setPosition(_posX, _posY);
-			star.setVelocity((910 - _posX) / 50, 200);
+			//star.setVelocity((910 - _posX) / 50, 200);
+			star.setVelocity(0, 200);
+			star.setRotatable(true);
+			star.setAngularVelocity((float)Math.random() - 1f);
 			star.setRestitution(restitution[_type]);
 			star.setDensity(density[_type]);
 			star.setDamping(damping[_type]);
@@ -133,7 +137,7 @@ public class StarManager {
 		return new FStar(_address, 8, 1, water);
 	}
 	
-	private class StarCreator extends Thread implements Runnable {
+	public class StarCreator extends Thread implements Runnable {
 		public boolean alive = true;
 		public int waitTime, posX, posY, type;
 		
@@ -150,11 +154,21 @@ public class StarManager {
 			canvas.text("" + type, posX - 10, posY - 10);
 		}
 		
+		public void starRemoved(){
+			if(type != 1 && alive){
+				createNextStar();
+			}
+		}
+		
+		private void createNextStar(){
+			FStar next = (FStar) createStar("127.0.0.1", type, posX, posY);
+			next.registerCreator(this);
+			addStar2Queue(next);
+		}
+		
 		public void run(){
 
-			while(alive){
-				addStar2Queue(createStar("127.0.0.1", type, posX, posY));
-				
+			while(alive && type == 1){
 				if(waitTime > 0){
 					try {
 						sleep(waitTime);
@@ -162,6 +176,7 @@ public class StarManager {
 				} else {
 					alive = false;
 				}
+				createNextStar();
 			}
 		}
 	}

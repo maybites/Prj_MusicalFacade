@@ -35,8 +35,6 @@ import geomerative.*;
 public class FImageStar extends FStar {
 	protected float m_size;
 	protected int m_type;
-
-	WaterSurface m_water;
 	
 	RShape m_shape;
 
@@ -48,10 +46,9 @@ public class FImageStar extends FStar {
 	 * @param _size
 	 *            the size of the star
 	 */
-	public FImageStar(String _address, int _size, int _type, WaterSurface _water, String filename) {
+	public FImageStar(String _address, int _size, int _type, String filename, WaterSurface _water) {
 		super(_address, _size, _type, _water);
 		m_size = Fisica.screenToWorld(_size);
-		m_water = _water;
 		m_address = _address;
 		m_type = _type;
 

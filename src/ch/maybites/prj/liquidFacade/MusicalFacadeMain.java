@@ -45,17 +45,19 @@ public class MusicalFacadeMain extends PApplet {
 	public final static String WINDOW_BODY_NAME = "window_";
 	public final static String STAR_BODY_NAME = "star_";
 	public final static String CLEANUP_BODY_NAME = "clear";
-	private final int BALL_HORIZONT = 250;
+	private final int BALL_HORIZONT = 260;
 	
-	//ServerIP 10.0.0.2 ServerPort 12421
+	//ServerIP 192.168.10.2 ServerPort 12421
 	//IPhonePort 12521
+
+	public final static String OSC_MAX_REFRESH = "/max/refresh";
 
 	public final static String OSC_SOUND_WINDOW = "/sound/window";
 	public final static String OSC_SOUND_STAR = "/sound/star";
 	public final static String OSC_IPHONE_WINDOW = "/iphone_echo"; //<(int)id> <(int)windowid> <posX> <posY>
 	public final static String OSC_IPHONE_STAR = "/iphone_star_date"; //<(int)id_eigen> <(int)id_ander> <posX> <posY>
 	public final static String OSC_IPHONE_WAIT = "/iphone_wait"; //<(int)seconds>
-	public final static String OSC_IPHONE_SERVERACKNOWLEDGE = "/iphone_serverisrunning";
+	public final static String OSC_IPHONE_SERVERACKNOWLEDGE = "/iphone_serverisrunning"; //<(int)frequenz> ??
 
 	public final static String OSC_FISICA_NEWSTAR = "/fisica_t_obj"; //<(int)id> <posX> <posY>
 	public final static String OSC_FISICA_SERVERRUNNING = "/fisica_isrunning"; 
@@ -91,6 +93,9 @@ public class MusicalFacadeMain extends PApplet {
 	int OSCiPhonePort;
 	String OSCsoundAddress;
 
+	int OSCcontrolPort;
+	String OSCcontrolAddress;
+
 	static private int iPhoneDeltaX = 30;
 	static private int iPhoneDeltaY = 30;
 	static private float iPhoneFactorX = 2.4f;
@@ -114,6 +119,8 @@ public class MusicalFacadeMain extends PApplet {
 		iPhoneDeltaY = GlobalPrefs.getInstance().getIntProperty("iPhoneDeltaY", 30);
 		iPhoneFactorX = GlobalPrefs.getInstance().getfloatProperty("iPhoneFactorX", 2.4f);
 		iPhoneFactorY = GlobalPrefs.getInstance().getfloatProperty("iPhoneFactorY", 2.7f);
+		OSCcontrolPort = GlobalPrefs.getInstance().getIntProperty("OSCcontrolPort", 12221);
+		OSCcontrolAddress = GlobalPrefs.getInstance().getStringProperty("OSCcontrolAddress", "127.0.0.1");
 
 		int winPosX = GlobalPrefs.getInstance().getIntProperty("windowsposx", 1440);
 		int winPosY = GlobalPrefs.getInstance().getIntProperty("windowsposy", 0);
@@ -158,6 +165,10 @@ public class MusicalFacadeMain extends PApplet {
 		
 		createCleanupBorders();
 		background(0);
+		
+		OscMessage refresh = new OscMessage(OSC_MAX_REFRESH);
+		NetAddress controlLocation = new NetAddress(OSCcontrolAddress,OSCcontrolPort);
+		oscP5.send(refresh, controlLocation);
 	}
 	
 	public void setiPhoneCoordinateFactors(int _deltaX, int _deltaY, float _factorX, float _factorY){
@@ -242,6 +253,7 @@ public class MusicalFacadeMain extends PApplet {
 		}
 		FWindow window = new FWindow(water);
 		window.setName(_name);
+		window.setID(Integer.parseInt(_name.substring(WINDOW_BODY_NAME.length())));
 		window.setAddress(_name, _adress);
 		window.setStaticBody(true);
 		window.setRestitution(WindowRestitution);
@@ -266,6 +278,9 @@ public class MusicalFacadeMain extends PApplet {
 		oscP5.releaseMessages();
 		stroke(255, 0, 0);
 		line(0, BALL_HORIZONT, 1920, BALL_HORIZONT);
+		line(18, 10, 1902, 10);
+		line(1902, BALL_HORIZONT, 1902, BALL_HORIZONT + 50);
+		line(18, BALL_HORIZONT, 18, BALL_HORIZONT + 50);
 
 		if (startSel != null) {
 			noFill();
@@ -375,66 +390,79 @@ public class MusicalFacadeMain extends PApplet {
 					star2starContact((FStar) body1, (FStar) body2);
 			}else if (body1.getName().startsWith(CLEANUP_BODY_NAME)) {
 				//println("cleanup body2!!");
-				world.remove(body2);
+				star2Cleanup(body2);
 			}else if (body2.getName().startsWith(CLEANUP_BODY_NAME)) {
 				//println("cleanup body1!!");
-				world.remove(body1);
+				star2Cleanup(body1);
 			}
 		} else {
 			println("body without name!!?");
 		}
 	}
+	
+	private void star2Cleanup(FBody _starBody){
+		FStar star = (FStar)_starBody;
+		star.remove();
+		world.remove(_starBody);
+	}
 
 	private void star2windowContact(FStar _star, FWindow _window) {
-		_star.hit();
-		_window.hit();
-		OscMessage soundwindow = new OscMessage(OSC_SOUND_WINDOW);
-		soundwindow.add(_window.getAddress()); // sound address
-		soundwindow.add(_star.getType()); // star type
-		soundwindow.add(_star.getVelocityX());
-		soundwindow.add(_star.getVelocityY());
-		soundwindow.add(_star.getX());
-		NetAddress soundLocation = new NetAddress(OSCsoundAddress, OSCsoundPort);
-		oscP5.send(soundwindow, soundLocation);
-
-		OscMessage iPhonewindow = new OscMessage(OSC_IPHONE_WINDOW);
-		iPhonewindow.add(_star.getType()); // star type
-		iPhonewindow.add(Integer.parseInt(_window.getName().substring(WINDOW_BODY_NAME.length()))); // window id
-		iPhonewindow.add(fisica2iphoneX(_star.getX()));
-		iPhonewindow.add(fisica2iphoneY(_star.getY()));
-		NetAddress iPhoneLocation = new NetAddress(_star.getAddress(),
-				OSCiPhonePort);
-		oscP5.send(iPhonewindow, iPhoneLocation);
+		if(_star.isReactive()){
+			if(_star.getType() != 2 || 
+					_star.getType() == 2 && _star.lastWindowHit != _window.getID()){
+				_star.hit(_window.getID());
+				_window.hit();
+				OscMessage soundwindow = new OscMessage(OSC_SOUND_WINDOW);
+				soundwindow.add(_window.getAddress()); // sound address
+				soundwindow.add(_star.getType()); // star type
+				soundwindow.add(_star.getVelocityX());
+				soundwindow.add(_star.getVelocityY());
+				soundwindow.add(_star.getX());
+				NetAddress soundLocation = new NetAddress(OSCsoundAddress, OSCsoundPort);
+				oscP5.send(soundwindow, soundLocation);
+	
+				OscMessage iPhonewindow = new OscMessage(OSC_IPHONE_WINDOW);
+				iPhonewindow.add(_star.getType()); // star type
+				iPhonewindow.add(Integer.parseInt(_window.getName().substring(WINDOW_BODY_NAME.length()))); // window id
+				iPhonewindow.add(fisica2iphoneX(_star.getX()));
+				iPhonewindow.add(fisica2iphoneY(_star.getY()));
+				NetAddress iPhoneLocation = new NetAddress(_star.getAddress(),
+						OSCiPhonePort);
+				oscP5.send(iPhonewindow, iPhoneLocation);
+			}
+		}
 	}
 
 	private void star2starContact(FStar _star1, FStar _star2) {
-		_star1.hit();
-		OscMessage soundStar = new OscMessage(OSC_SOUND_STAR);
-		soundStar.add(_star1.getType()); // star type
-		soundStar.add(_star2.getType()); // star type
-		soundStar.add(abs(_star1.getVelocityX()) + abs(_star2.getVelocityX())
-				+ abs(_star1.getVelocityY()) + abs(_star2.getVelocityY()));
-		soundStar.add(_star1.getX()); // star pos
-		NetAddress soundLocation = new NetAddress(OSCsoundAddress, OSCsoundPort);
-		oscP5.send(soundStar, soundLocation);
-
-		if(_star1.getAddress() != _star2.getAddress()){
-			OscMessage iPhoneStar = new OscMessage(OSC_IPHONE_STAR);
-			iPhoneStar.add(_star1.getType()); // star type
-			iPhoneStar.add(_star2.getType()); // star type
-			iPhoneStar.add(fisica2iphoneX(_star1.getX()));
-			iPhoneStar.add(fisica2iphoneY(_star1.getY()));
-			NetAddress iPhoneLocation = new NetAddress(_star1.getAddress(),
-					OSCiPhonePort);
-			oscP5.send(iPhoneStar, iPhoneLocation);
+		if(_star1.isReactive() && _star2.isReactive()){
+			_star1.hit(-1);
+			OscMessage soundStar = new OscMessage(OSC_SOUND_STAR);
+			soundStar.add(_star1.getType()); // star type
+			soundStar.add(_star2.getType()); // star type
+			soundStar.add(abs(_star1.getVelocityX()) + abs(_star2.getVelocityX())
+					+ abs(_star1.getVelocityY()) + abs(_star2.getVelocityY()));
+			soundStar.add(_star1.getX()); // star pos
+			NetAddress soundLocation = new NetAddress(OSCsoundAddress, OSCsoundPort);
+			oscP5.send(soundStar, soundLocation);
 	
-			iPhoneStar = new OscMessage(OSC_IPHONE_STAR);
-			iPhoneStar.add(_star2.getType()); // star type
-			iPhoneStar.add(_star1.getType()); // star type
-			iPhoneStar.add(fisica2iphoneX(_star2.getX()));
-			iPhoneStar.add(fisica2iphoneY(_star2.getY()));
-			iPhoneLocation = new NetAddress(_star2.getAddress(), OSCiPhonePort);
-			oscP5.send(iPhoneStar, iPhoneLocation);
+			if(_star1.getAddress() != _star2.getAddress()){
+				OscMessage iPhoneStar = new OscMessage(OSC_IPHONE_STAR);
+				iPhoneStar.add(_star1.getType()); // star type
+				iPhoneStar.add(_star2.getType()); // star type
+				iPhoneStar.add(fisica2iphoneX(_star1.getX()));
+				iPhoneStar.add(fisica2iphoneY(_star1.getY()));
+				NetAddress iPhoneLocation = new NetAddress(_star1.getAddress(),
+						OSCiPhonePort);
+				oscP5.send(iPhoneStar, iPhoneLocation);
+		
+				iPhoneStar = new OscMessage(OSC_IPHONE_STAR);
+				iPhoneStar.add(_star2.getType()); // star type
+				iPhoneStar.add(_star1.getType()); // star type
+				iPhoneStar.add(fisica2iphoneX(_star2.getX()));
+				iPhoneStar.add(fisica2iphoneY(_star2.getY()));
+				iPhoneLocation = new NetAddress(_star2.getAddress(), OSCiPhonePort);
+				oscP5.send(iPhoneStar, iPhoneLocation);
+			}
 		}
 	}
 
@@ -452,8 +480,10 @@ public class MusicalFacadeMain extends PApplet {
 	static public void main(String args[]) {
 		 //PApplet.main(new String[] {"--present",
 		 //"ch.maybites.prj.liquidFacade.MusicalFacadeMain" });
-		PApplet.main(new String[] { "--display=2", "--present",
-				"ch.maybites.prj.liquidFacade.MusicalFacadeMain" });
+		//PApplet.main(new String[] { "--display=1", "--present",
+		//"ch.maybites.prj.liquidFacade.MusicalFacadeMain" });
+		PApplet.main(new String[] { "--display=1",
+		"ch.maybites.prj.liquidFacade.MusicalFacadeMain" });
 	}
 
 	static public int iphone2fisicaX(int posX){
@@ -461,15 +491,15 @@ public class MusicalFacadeMain extends PApplet {
 	}
 	
 	static public int iphone2fisicaY(int posY){
-		return (int) ((float)(posY + iPhoneDeltaY) * iPhoneFactorY);
+		return (int) ((float)(posY * iPhoneFactorY + iPhoneDeltaY));
 	}
 	
 	static public int fisica2iphoneX(float posX){
-		return (int) (posX / iPhoneFactorX)  + iPhoneDeltaX;
+		return (int) (((posX) / iPhoneFactorX)  + iPhoneDeltaX);
 	}
 	
 	static public int fisica2iphoneY(float posY){
-		return (int) (posY / iPhoneFactorY)  - iPhoneDeltaY;
+		return (int) (((posY) - iPhoneDeltaY) / iPhoneFactorY);
 	}
 	
 	

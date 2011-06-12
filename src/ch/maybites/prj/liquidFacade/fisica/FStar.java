@@ -4,9 +4,11 @@ import org.jbox2d.collision.shapes.CircleDef;
 import org.jbox2d.collision.shapes.ShapeDef;
 
 import processing.core.PGraphics;
+import ch.maybites.prj.liquidFacade.StarManager.StarCreator;
 import ch.maybites.prj.liquidFacade.animation.Animator;
 import ch.maybites.prj.liquidFacade.animation.StarAnimator;
 import ch.maybites.prj.liquidFacade.gestalt.water.WaterSurface;
+import ch.maybites.tools.Debugger;
 import fisica.FBlob;
 import fisica.FBody;
 import fisica.FBox;
@@ -35,7 +37,11 @@ public class FStar extends FBody {
 	protected float m_size;
 	protected int m_type;
 	StarAnimator m_animator;
+	StarCreator m_creator;
+	int m_hitCounter;
 	WaterSurface m_water;
+	boolean m_isReactive;
+	public int lastWindowHit;
 	
 	protected String m_address;
 
@@ -48,9 +54,18 @@ public class FStar extends FBody {
 	public FStar(String _address, int _size, int _type, WaterSurface _water) {
 		super();
 		m_size = Fisica.screenToWorld(_size);
-		m_water = _water;
 		m_address = _address;
 		m_type = _type;
+		m_water = _water;
+		m_isReactive = true;
+		lastWindowHit = -1;
+		m_hitCounter = 20;
+		if(_type == 1)
+			m_hitCounter = 1;
+		else if(_type == 2)
+			setSensor(true);
+		else if(_type == 3)
+			m_hitCounter = 3;
 	}
 
 	protected ShapeDef getShapeDef() {
@@ -66,6 +81,14 @@ public class FStar extends FBody {
 	public void registerAniator(StarAnimator _animator){
 		m_animator = _animator;
 		m_animator.register(this);
+	}
+	
+	public void registerCreator(StarCreator _creator){
+		m_creator = _creator;
+	}
+
+	public boolean isReactive(){
+		return m_isReactive;
 	}
 
 	/**
@@ -125,8 +148,23 @@ public class FStar extends FBody {
 		return m_address;
 	}
 
-	public void hit() {
-		m_water.drawPebble(getX(), getY());
+	public void hit(int _windowID) {
+		//_water.drawPebble(getX(), getY());
+		if(--m_hitCounter == 0){
+			remove();
+		}
+		lastWindowHit = _windowID;
+	}
+
+	public void remove() {
+		if(m_isReactive){
+			if(m_creator != null){
+				m_creator.starRemoved();
+			}
+			setSensor(true);
+			m_isReactive = false;
+		//Debugger.getInstance().debugMessage(this.getClass(), "removed star");
+		}
 	}
 
 	public void draw(PGraphics applet) {
@@ -135,8 +173,18 @@ public class FStar extends FBody {
 		if (m_image != null) {
 			drawImage(applet);
 		} else {
+			applet.fill(50);
 			applet.ellipse(0, 0, getSize(), getSize());
+			applet.fill(150);
+			applet.ellipse(0, 0, getSize()/2, getSize()/2);
+			applet.stroke(150);
+			applet.strokeWeight(0.5f);
 			applet.line(-getSize(), 0, getSize(), 0);
+			applet.line(0, -getSize(), 0, getSize());
+			applet.stroke(250);
+			applet.strokeWeight(1f);
+			applet.line(-getSize()*.5f, 0, getSize()*.5f, 0);
+			applet.line(0, -getSize()*.5f, 0, getSize()*.5f);
 		}
 
 		postDraw(applet);
