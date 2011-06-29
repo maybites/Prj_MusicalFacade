@@ -102,6 +102,7 @@ public class MusicalFacadeMain extends PApplet {
 	static private float iPhoneFactorY = 2.7f;
 
 	public void setup() {
+		
 		size(1920, 1080, OPENGL); //1080p
 		//size(1280, 720, OPENGL); //720p
 		//camera(width / 2.0f, height / 2.0f, 700, width / 2.0f, height / 2.0f, 0f, 0f, 1f, 0f); //720p
