@@ -70,19 +70,12 @@ public class FImageStar extends FStar {
 	    this.setNoStroke();
 	}
 
-	public void hit() {
-		m_water.drawPebble(getX(), getY());
-	}
-
 	public void draw(PGraphics applet) {
 		preDraw(applet);
 
-		if (m_image != null) {
-			drawImage(applet);
-		} else {
-			//applet.ellipse(0, 0, getSize(), getSize());
-		    m_shape.draw(applet);
-			//applet.line(0, 0, getSize() / 2, 0);
+		m_shape.draw(applet);
+		if(m_animator != null){
+			m_animator.draw(applet);
 		}
 
 		postDraw(applet);

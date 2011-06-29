@@ -21,7 +21,7 @@ public class WaterSurface {
     private JoglDisposableBin myCanvas;
     
     int width, height;
-
+    
 	public WaterSurface(int _width, int _height){
 		width = _width;
 		height = _height;
@@ -69,7 +69,9 @@ public class WaterSurface {
         Canvas.getInstance().getPlugin().bin(Gestalt.BIN_3D).add(_myWaterView);
       // _myWaterView.rotation(.5f, 0f, 0f);
 
-        _mySimulation.damping = 0.985f;
+        _mySimulation.damping = 0.990f;
+        _mySimulation.contrast = 2.0f;
+        drawCenterClearBox(0,0,_width,height);
 	}
 	
 	public void waterviewDistance(int z){
@@ -84,10 +86,11 @@ public class WaterSurface {
 		return worldPosY - height / 2;
 	}
 	
-    public void drawPebble(float _mouseX, float _mouseY) {
+    public void drawPebble(Color c, float _mouseX, float _mouseY) {
     	float mouseX = world2WaterX(_mouseX);
     	float mouseY = world2WaterY(_mouseY);
-        myCanvas.line(mouseX + 2, mouseY + 2,
+    	myCanvas.color(c);
+       myCanvas.line(mouseX + 2, mouseY + 2,
         		mouseX - 2, mouseY - 2);
         myCanvas.line(mouseX - 2, mouseY + 2,
         		mouseX + 2, mouseY - 2);
@@ -115,10 +118,11 @@ public class WaterSurface {
     	myCanvas.line(xPos - size/2, yPos + size/2, xPos - size/2, yPos - size/2);
     }
     
-    public void drawCenterBox(Color c, int _xPos, int _yPos, int sizeX, int sizeY){
+    public void drawCenterBox(Color c, int _lineWidth, int _xPos, int _yPos, int sizeX, int sizeY){
       	float xPos = world2WaterX(_xPos);
     	float yPos = world2WaterY(_yPos);
     	myCanvas.color(c);
+    	myCanvas.linewidth(_lineWidth);
     	myCanvas.line(xPos + sizeX/2, yPos + sizeY/2, xPos - sizeX/2, yPos + sizeY/2);
     	myCanvas.line(xPos + sizeX/2, yPos - sizeY/2, xPos - sizeX/2, yPos - sizeY/2);
     	myCanvas.line(xPos + sizeX/2, yPos + sizeY/2, xPos + sizeX/2, yPos - sizeY/2);

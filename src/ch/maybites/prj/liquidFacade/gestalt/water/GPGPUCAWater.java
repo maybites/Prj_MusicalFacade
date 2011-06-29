@@ -52,6 +52,7 @@ public class GPGPUCAWater
     public Vector2f flow_direction = new Vector2f(0, 0);
 
     public float damping = 0.998f;
+    public float contrast = 1.5f;
 
     private final JoglGPGPUFBO[] _myFBOs;
 
@@ -182,6 +183,7 @@ public class GPGPUCAWater
 
             public void setUniforms() {
                 setUniform("heightfield", JoglUtil.getTextureUnitID(theMaterial.texture().getTextureUnit()));
+                setUniform("contrast", contrast);
             }
         };
 

@@ -6,6 +6,6 @@ import ch.maybites.prj.liquidFacade.fisica.*;
 public abstract class Animator {
 
 	abstract public void hit();
-	abstract public void set(float dt);
-	abstract public void draw(PApplet canvas);
+	abstract public void step(float dt);
+	abstract public void draw(PGraphics canvas);
 }

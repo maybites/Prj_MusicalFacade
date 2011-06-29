@@ -2,6 +2,12 @@ package ch.maybites.prj.liquidFacade;
 
 import java.util.ArrayList;
 
+import ch.maybites.prj.liquidFacade.animation.StarAnimator;
+import ch.maybites.prj.liquidFacade.animation.StarFourAnim;
+import ch.maybites.prj.liquidFacade.animation.StarOneAnim;
+import ch.maybites.prj.liquidFacade.animation.StarThreeAnim;
+import ch.maybites.prj.liquidFacade.animation.StarTwoAnim;
+import ch.maybites.prj.liquidFacade.animation.StarZeroAnim;
 import ch.maybites.prj.liquidFacade.fisica.FImageStar;
 import ch.maybites.prj.liquidFacade.fisica.FStar;
 import ch.maybites.prj.liquidFacade.gestalt.water.WaterSurface;
@@ -116,14 +122,30 @@ public class StarManager {
 	public synchronized FBody createStar(String _address, int _type, int _posX, int _posY){
 		if(_type >= 0 && _type < maxStarTypes){
 			FStar star;
+			StarAnimator animator;
 			if(_type == 0){
-				star = new FImageStar(_address, 20, _type, GlobalPrefs.getInstance().getAbsDataPath("vector/stars/mlove.svg"), water);
+				//star = new FImageStar(_address, 20, _type, GlobalPrefs.getInstance().getAbsDataPath("vector/stars/mlove.svg"), water);
+				star = new FImageStar(_address, 20, _type, GlobalPrefs.getInstance().getAbsDataPath("vector/stars/mlove_logo_hearticon.svg"), water);
+				animator = new StarZeroAnim();
 			}else{
 				star = new FStar(_address, 8, _type, water);
+				if(_type == 1){
+					animator = new StarOneAnim();
+				}else if(_type == 2){
+					animator = new StarTwoAnim();
+				}else if(_type == 3){
+					animator = new StarThreeAnim();
+				}else if(_type == 3){
+					animator = new StarFourAnim();
+				}else{
+					animator = new StarZeroAnim();
+				}
 			}
+			star.registerAnimator(animator);
 			star.setName(MusicalFacadeMain.STAR_BODY_NAME + _type);
 			star.setNoStroke();
 			star.setFill(255);
+			star.setGroupIndex(-1);
 			star.setPosition(_posX, _posY);
 			//star.setVelocity((910 - _posX) / 50, 200);
 			star.setVelocity(0, 200);

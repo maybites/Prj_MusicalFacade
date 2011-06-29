@@ -14,6 +14,7 @@ import fisica.FBody;
 import fisica.FBox;
 import fisica.FLine;
 import fisica.FPoly;
+import fisica.FWorld;
 import fisica.Fisica;
 
 /**
@@ -34,12 +35,12 @@ import fisica.Fisica;
  * @see FLine
  */
 public class FStar extends FBody {
-	protected float m_size;
+	public float size;
 	protected int m_type;
 	StarAnimator m_animator;
 	StarCreator m_creator;
 	int m_hitCounter;
-	WaterSurface m_water;
+	public WaterSurface water;
 	boolean m_isReactive;
 	public int lastWindowHit;
 	
@@ -53,13 +54,13 @@ public class FStar extends FBody {
 	 */
 	public FStar(String _address, int _size, int _type, WaterSurface _water) {
 		super();
-		m_size = Fisica.screenToWorld(_size);
+		size = Fisica.screenToWorld(_size);
 		m_address = _address;
 		m_type = _type;
-		m_water = _water;
+		water = _water;
 		m_isReactive = true;
 		lastWindowHit = -1;
-		m_hitCounter = 20;
+		m_hitCounter = 10;
 		if(_type == 1)
 			m_hitCounter = 1;
 		else if(_type == 2)
@@ -70,7 +71,7 @@ public class FStar extends FBody {
 
 	protected ShapeDef getShapeDef() {
 		CircleDef pd = new CircleDef();
-		pd.radius = m_size / 2.0f;
+		pd.radius = size / 2.0f;
 		pd.density = m_density;
 		pd.friction = m_friction;
 		pd.restitution = m_restitution;
@@ -78,7 +79,11 @@ public class FStar extends FBody {
 		return pd;
 	}
 	
-	public void registerAniator(StarAnimator _animator){
+	public FWorld getWorld(){
+		return this.m_world;
+	}
+	
+	public void registerAnimator(StarAnimator _animator){
 		m_animator = _animator;
 		m_animator.register(this);
 	}
@@ -91,6 +96,14 @@ public class FStar extends FBody {
 		return m_isReactive;
 	}
 
+	public boolean isReactive(int _windowID){
+		if(m_type != 2 || 
+				m_type == 2 && lastWindowHit != _windowID){
+			return m_isReactive;
+		}
+		return false;
+	}
+
 	/**
 	 * Returns the size of the circle.
 	 * 
@@ -98,7 +111,7 @@ public class FStar extends FBody {
 	 * @return the size of the circle
 	 */
 	public float getSize() {
-		return Fisica.worldToScreen(m_size);
+		return Fisica.worldToScreen(size);
 	}
 
 	/**
@@ -110,7 +123,7 @@ public class FStar extends FBody {
 	 *            the size of the circle
 	 */
 	public void setSize(float size) {
-		m_size = Fisica.screenToWorld(size);
+		size = Fisica.screenToWorld(size);
 
 		this.recreateInWorld();
 	}
@@ -148,8 +161,18 @@ public class FStar extends FBody {
 		return m_address;
 	}
 
+	public void step(float _dt) {
+		//_water.drawPebble(getX(), getY());
+		if(m_animator != null){
+			m_animator.step(_dt);
+		}
+	}
+
 	public void hit(int _windowID) {
 		//_water.drawPebble(getX(), getY());
+		if(m_animator != null){
+			m_animator.hit();
+		}
 		if(--m_hitCounter == 0){
 			remove();
 		}
@@ -169,22 +192,9 @@ public class FStar extends FBody {
 
 	public void draw(PGraphics applet) {
 		preDraw(applet);
-
-		if (m_image != null) {
-			drawImage(applet);
-		} else {
-			applet.fill(50);
-			applet.ellipse(0, 0, getSize(), getSize());
-			applet.fill(150);
-			applet.ellipse(0, 0, getSize()/2, getSize()/2);
-			applet.stroke(150);
-			applet.strokeWeight(0.5f);
-			applet.line(-getSize(), 0, getSize(), 0);
-			applet.line(0, -getSize(), 0, getSize());
-			applet.stroke(250);
-			applet.strokeWeight(1f);
-			applet.line(-getSize()*.5f, 0, getSize()*.5f, 0);
-			applet.line(0, -getSize()*.5f, 0, getSize()*.5f);
+		
+		if(m_animator != null){
+			m_animator.draw(applet);
 		}
 
 		postDraw(applet);

@@ -65,7 +65,7 @@ public class MusicalFacadeMain extends PApplet {
 	public final static String OSC_FISICA_CREATE = "/fisica/create";
 	public final static String OSC_FISICA_SETPOS = "/fisica/setPos";
 	public final static String OSC_FISICA_SETADDRESS = "/fisica/setAddress";
-	public final static String OSC_FISICA_SETCUSTOM = "/fisica/setCustom";
+	public final static String OSC_FISICA_SETCUSTOM = "/fisica/customSet";
 	public final static String OSC_FISICA_CREATESTAR = "/fisica/createstar";
 	public final static String OSC_FISICA_WORLDSET = "/fisica/world/set";
 	public final static String OSC_FISICA_STARSET = "/fisica/star/set";
@@ -102,8 +102,10 @@ public class MusicalFacadeMain extends PApplet {
 	static private float iPhoneFactorY = 2.7f;
 
 	public void setup() {
-		size(1920, 1080, OPENGL);
-		// size(1440, 810, OPENGL);
+		size(1920, 1080, OPENGL); //1080p
+		//size(1280, 720, OPENGL); //720p
+		//camera(width / 2.0f, height / 2.0f, 700, width / 2.0f, height / 2.0f, 0f, 0f, 1f, 0f); //720p
+		camera(width / 2.0f, height / 2.0f, 1060, width / 2.0f, height / 2.0f, 0f, 0f, 1f, 0f); //1920p
 
 		GlobalPrefs.getInstance().setDataPath(this.dataPath(""));
 		this.frameRate(60f);
@@ -136,11 +138,9 @@ public class MusicalFacadeMain extends PApplet {
 		gestalt = Canvas.getInstance().getPlugin();
 		gestalt.drawBeforeProcessing(true);
 
-		camera(width / 2.0f, height / 2.0f, 1060, width / 2.0f, height / 2.0f,
-				0f, 0f, 1f, 0f);
-
 		water = new WaterSurface(width, height);
-		water.waterviewDistance(-162);
+		water.waterviewDistance(-162); //1920p
+		//water.waterviewDistance(-113); //720p
 
 		Fisica.init(this);
 
@@ -251,19 +251,20 @@ public class MusicalFacadeMain extends PApplet {
 			world.remove(body);
 			oscP5.unplug(body);
 		}
-		FWindow window = new FWindow(water);
+		FWindow window = new FWindow(water, width, height);
 		window.setName(_name);
 		window.setID(Integer.parseInt(_name.substring(WINDOW_BODY_NAME.length())));
 		window.setAddress(_name, _adress);
+		window.setType(_name, _type);
 		window.setStaticBody(true);
 		window.setRestitution(WindowRestitution);
-		window.setPosition(posX, posY);
+		window.setPosition(_name, posX, posY, sizeX, sizeY);
 		window.setRotation(0.05f);
 		window.setWidth(sizeX);
 		window.setHeight(sizeY);
-		oscP5.plug(window, "setPosition", "/fisica/setPos");
-		oscP5.plug(window, "setAddress", "/fisica/setAddress");
-		oscP5.plug(window, "setCustom", "/fisica/setCustom");
+		oscP5.plug(window, "setPosition", OSC_FISICA_SETPOS);
+		oscP5.plug(window, "setAddress", OSC_FISICA_SETADDRESS);
+		oscP5.plug(window, "setCustom", OSC_FISICA_SETCUSTOM);
 		world.add(window);
 	}
 
@@ -288,7 +289,7 @@ public class MusicalFacadeMain extends PApplet {
 					- startSel.y);
 		}
 
-		shape(schloss, 0, 0, 1920, 1080);
+		shape(schloss, 0, 0, width, height);
 
 		starManager.step(world);
 		starManager.draw(this);
@@ -338,7 +339,7 @@ public class MusicalFacadeMain extends PApplet {
 	private void createRandomStarGenerators(int _number) {
 		for (int i = 0; i < _number; i++) {
 			starManager.addStarCreator((int) random(0, 1920),
-					(int) random(0, BALL_HORIZONT), (int) random(0, 10),
+					(int) random(0, BALL_HORIZONT), (int) random(0, 5),
 					(int) random(1000, 5000));
 		}
 	}
@@ -407,9 +408,9 @@ public class MusicalFacadeMain extends PApplet {
 	}
 
 	private void star2windowContact(FStar _star, FWindow _window) {
-		if(_star.isReactive()){
-			if(_star.getType() != 2 || 
-					_star.getType() == 2 && _star.lastWindowHit != _window.getID()){
+		if(_star.isReactive(_window.getID())){
+//			if(_star.getType() != 2 || 
+//					_star.getType() == 2 && _star.lastWindowHit != _window.getID()){
 				_star.hit(_window.getID());
 				_window.hit();
 				OscMessage soundwindow = new OscMessage(OSC_SOUND_WINDOW);
@@ -429,7 +430,7 @@ public class MusicalFacadeMain extends PApplet {
 				NetAddress iPhoneLocation = new NetAddress(_star.getAddress(),
 						OSCiPhonePort);
 				oscP5.send(iPhonewindow, iPhoneLocation);
-			}
+//			}
 		}
 	}
 
