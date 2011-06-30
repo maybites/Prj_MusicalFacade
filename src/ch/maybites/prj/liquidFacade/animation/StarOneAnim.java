@@ -1,45 +1,49 @@
 package ch.maybites.prj.liquidFacade.animation;
 
+import java.awt.Color;
+
 import fisica.FCircle;
 import processing.core.PGraphics;
 
 public class StarOneAnim extends StarAnimator {
-
+	
+	int transparency1 = 255;
+	int transparency2 = 100;
+	
+	int red = 242;
+	int green = 149;
+	int blue = 28;
+	
+	Color c = new Color(red, green, blue);
+	
+	boolean hit = false;
+	
 	public StarOneAnim(){
 		;
 	}
 	
 	public void hit() {
-		for(int i = 0; i < 10; i++){
-			FCircle bang = new FCircle(4f);
-			bang.setDamping(.5f);
-			bang.setName("Star01Parts");
-			bang.setDensity(1f);
-			bang.setSensor(false);
-			bang.setGroupIndex(-1);
-			bang.setPosition(m_star.getX(), m_star.getY());
-			bang.setVelocity(-m_star.getVelocityX() * 4f * (float)(Math.random() - .5f), -m_star.getVelocityY() * 2f * (float)(Math.random() - .5f));
-			m_star.getWorld().add(bang);
-		}
+		transparency2 = 250;
+		c = new Color(250, 250, 250);
+		hit = true;
 	}
 
 	public void step(float dt) {
-		;
+		if(hit){
+			int newred = red + (int)((float)(c.getRed() - red) * .95f);
+			int newgreen = green + (int)((float)(c.getGreen() - green) * .95f);
+			int newblue = blue + (int)((float)(c.getBlue() - blue) * .95f);
+			c = new Color(newred, newgreen, newblue);
+			transparency1 = transparency1 - 1;
+			transparency2 = transparency2 - 1;
+		}
 	}
 
 	public void draw(PGraphics applet) {
-		applet.fill(50);
+		applet.fill(c.getRed(), c.getGreen(), c.getBlue(), transparency2);
 		applet.ellipse(0, 0, m_star.getSize(), m_star.getSize());
-		applet.fill(150);
+		applet.fill(c.getRed(), c.getGreen(), c.getBlue(), transparency1);
 		applet.ellipse(0, 0, m_star.getSize()/2, m_star.getSize()/2);
-		applet.stroke(150);
-		applet.strokeWeight(0.5f);
-		applet.line(-m_star.getSize(), 0, m_star.getSize(), 0);
-		applet.line(0, -m_star.getSize(), 0, m_star.getSize());
-		applet.stroke(250);
-		applet.strokeWeight(1f);
-		applet.line(-m_star.getSize()*.5f, 0, m_star.getSize()*.5f, 0);
-		applet.line(0, -m_star.getSize()*.5f, 0, m_star.getSize()*.5f);
 	}
 
 }

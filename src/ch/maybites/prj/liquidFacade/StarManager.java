@@ -125,17 +125,17 @@ public class StarManager {
 			StarAnimator animator;
 			if(_type == 0){
 				//star = new FImageStar(_address, 20, _type, GlobalPrefs.getInstance().getAbsDataPath("vector/stars/mlove.svg"), water);
-				star = new FImageStar(_address, 20, _type, GlobalPrefs.getInstance().getAbsDataPath("vector/stars/mlove_logo_hearticon.svg"), water);
+				star = new FImageStar(_address, 25, _type, GlobalPrefs.getInstance().getAbsDataPath("vector/stars/mlove_logo_hearticon.svg"), water);
 				animator = new StarZeroAnim();
 			}else{
-				star = new FStar(_address, 8, _type, water);
+				star = new FStar(_address, 13, _type, water);
 				if(_type == 1){
 					animator = new StarOneAnim();
 				}else if(_type == 2){
 					animator = new StarTwoAnim();
 				}else if(_type == 3){
 					animator = new StarThreeAnim();
-				}else if(_type == 3){
+				}else if(_type == 4){
 					animator = new StarFourAnim();
 				}else{
 					animator = new StarZeroAnim();
